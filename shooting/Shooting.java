@@ -30,13 +30,13 @@ public class Shooting extends JFrame {
 class MyJPanel extends JPanel implements MouseListener, MouseMotionListener, ActionListener {
     // 定数
     private final int JIKI_Y = 400;
-    private final int JIKI_W = 40, JIKI_H = 40;
+    private final int JIKI_W = 40, JIKI_H = 40;//自機の初期値
 
     // ゲーム状態
     private int jikiX = 350;
     private ArrayList<Enemy> enemies = new ArrayList<>();
     private ArrayList<Bullet> playerBullets = new ArrayList<>();
-    private ArrayList<Bullet> enemyBullets = new ArrayList<>();
+    private ArrayList<Bullet> enemyBullets = new ArrayList<>();//敵の弾と敵機の配列設定
     private Timer timer;
     private boolean isGameOver = false;
     private boolean isClear = false;
@@ -46,13 +46,13 @@ class MyJPanel extends JPanel implements MouseListener, MouseMotionListener, Act
         
         // 敵機の初期配置
         for (int i = 0; i < 13; i++) {
-            enemies.add(new Enemy(i * 50 + 100, (i % 2) * 40 + 20));
+            enemies.add(new Enemy(i * 50 + 100, (i % 2) * 40 + 20));//敵機が被らないように１３体配置
         }
 
         addMouseListener(this);
         addMouseMotionListener(this);
 
-        // 33ms = 約30FPSで更新
+        // 約30FPSで更新
         timer = new Timer(33, this);
         timer.start();
     }
@@ -81,22 +81,22 @@ class MyJPanel extends JPanel implements MouseListener, MouseMotionListener, Act
         if (isGameOver) drawMessage(g, "GAME OVER");
         if (isClear) drawMessage(g, "STAGE CLEAR!");
     }
-
+//メッセージ描写　ゲームオーバーなどの色と配置
     private void drawMessage(Graphics g, String msg) {
         g.setColor(Color.ORANGE);
-        g.setFont(new Font("SansSerif", Font.BOLD, 50));
+        g.setFont(new Font("SansSerif", Font.BOLD, 50));//フォント←AI
         g.drawString(msg, 230, 250);
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(ActionEvent e) {//１フレームごとの移動設定　自機敵機の動き
         if (isGameOver || isClear) return;
 
         // 1. 自機の弾の移動と判定
         for (int i = playerBullets.size() - 1; i >= 0; i--) {
-            Bullet b = playerBullets.get(i);
+            Bullet b = playerBullets.get(i);//弾取得
             b.y -= 15;
-            if (b.y < 0) playerBullets.remove(i);
+            if (b.y < 0) playerBullets.remove(i);//画面外行ったら消す
         }
 
         // 2. 敵機の移動と当たり判定
@@ -107,14 +107,14 @@ class MyJPanel extends JPanel implements MouseListener, MouseMotionListener, Act
             // 自機弾との衝突
             for (int j = playerBullets.size() - 1; j >= 0; j--) {
                 Bullet b = playerBullets.get(j);
-                if (en.getBounds().contains(b.x, b.y)) {
+                if (en.getBounds().contains(b.x, b.y)) {//敵に弾の座標が触れたら
                     enemies.remove(i);
-                    playerBullets.remove(j);
+                    playerBullets.remove(j);//敵機も自機の弾も消す
                     break;
                 }
             }
 
-            // 敵の弾を発射するロジック（確率）
+            // 敵の弾を発射するロジック（ランダム確率）大体３秒に１回
             if (Math.random() < 0.02) {
                 enemyBullets.add(new Bullet(en.x + 15, en.y + 30));
             }
@@ -126,7 +126,7 @@ class MyJPanel extends JPanel implements MouseListener, MouseMotionListener, Act
             b.y += 8;
             if (b.y > getHeight()) {
                 enemyBullets.remove(i);
-            } else if (new Rectangle(jikiX, JIKI_Y, JIKI_W, JIKI_H).contains(b.x, b.y)) {
+            } else if (new Rectangle(jikiX, JIKI_Y, JIKI_W, JIKI_H).contains(b.x, b.y)) {//自機と弾が触れたらゲームオーバー
                 isGameOver = true;
             }
         }
@@ -139,7 +139,7 @@ class MyJPanel extends JPanel implements MouseListener, MouseMotionListener, Act
     public void mouseMoved(MouseEvent e) {
         jikiX = e.getX() - JIKI_W / 2;
         if (jikiX < 0) jikiX = 0;
-        if (jikiX > getWidth() - JIKI_W) jikiX = getWidth() - JIKI_W;
+        if (jikiX > getWidth() - JIKI_W) jikiX = getWidth() - JIKI_W;//マウスがswing画面から離れたときに自機の位置を壁に
         repaint();
     }
 
@@ -158,20 +158,20 @@ class MyJPanel extends JPanel implements MouseListener, MouseMotionListener, Act
 }
 
 /**
- * 敵機クラス（データと振る舞いをカプセル化）
+ * 敵機クラス
  */
 class Enemy {
     int x, y, speed;
     public Enemy(int x, int y) {
         this.x = x; this.y = y;
-        this.speed = (int)(Math.random() * 5) + 3;
+        this.speed = (int)(Math.random() * 5) + 3;//敵機のスピードを敵機ごとに変える
     }
     public void move(int width) {
         x += speed;
-        if (x < 0 || x > width - 30) speed *= -1;
+        if (x < 0 || x > width - 30) speed *= -1;//x軸は端で方向反転
     }
     public Rectangle getBounds() {
-        return new Rectangle(x, y, 30, 30);
+        return new Rectangle(x, y, 30, 30);//敵の判定
     }
 }
 
